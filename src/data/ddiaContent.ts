@@ -261,38 +261,12 @@ export const ddiaChapters: ChapterContent[] = [
               "跟踪每个副本的版本号，检测并发写入冲突。允许应用层自定义合并逻辑。DynamoDB 使用。",
           },
           {
-            label: "CRDTs",
+            label: "CRDTs 无冲突复制数据类型",
             content:
               "Conflict-free Replicated Data Types。数据结构本身保证合并结果收敛。计数器、集合、映射等。Redis CRDB 使用。",
           },
         ],
-      },
-      {
-        title: "法定人数读写",
-        concept: "Quorum Reads & Writes",
-        description: "无主复制系统中，通过调节读写副本数来平衡一致性和可用性。",
-        items: [
-          {
-            label: "法定条件",
-            content:
-              "R + W > N，其中 R=读副本数，W=写副本数，N=总副本数。保证至少有一个副本包含最新数据。",
-          },
-          {
-            label: "Read Repair",
-            content:
-              "读取时发现过期数据，自动将最新值写回该副本。被动修复机制。",
-          },
-          {
-            label: "Hinted Handoff",
-            content: "写入目标节点不可达时，暂存到其他节点，待目标恢复后传回。",
-          },
-          {
-            label: "Anti-Entropy",
-            content:
-              "后台进程比较副本的 Merkle Tree，发现差异后同步。主动修复机制。",
-          },
-        ],
-      },
+      }
     ],
   },
   {

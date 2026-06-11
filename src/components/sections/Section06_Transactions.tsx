@@ -1,17 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CodeBlock } from '../shared/CodeBlock';
 import { ChapterBadge } from '../shared/ChapterBadge';
 import { TechCard } from '../shared/TechCard';
 import { AlertBanner } from '../shared/AlertBanner';
 import { AnimatedNumber } from '../shared/AnimatedNumber';
 import { ddiaChapters } from '../../data/ddiaContent';
-import { useSectionPlayMode } from '../../contexts/SectionVisibilityContext';
+import { useSectionVisibility } from '../../contexts/SectionVisibilityContext';
 
 const chapter = ddiaChapters[4]; // DDIA Chapter 7 - Transactions
-
-// Phase duration constants
-const PHASE_DURATION = 2500;
 
 // ===== Sub-components =====
 
@@ -175,33 +171,15 @@ function ACIDLetters() {
 
 export default function Section06_Transactions() {
   const SECTION_INDEX = 5;
-  const playMode = useSectionPlayMode(SECTION_INDEX);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
 
-  const contentVisible = playMode !== 'hidden';
+  const contentVisible = mode !== 'hidden';
 
-  const [phase, setPhase] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const totalPhases = 9; // 0-8
-
-  useEffect(() => {
-    if (!isInView) return;
-    if (phase >= totalPhases - 1) return;
-
-    timerRef.current = setTimeout(() => {
-      setPhase(prev => Math.min(prev + 1, totalPhases - 1));
-    }, PHASE_DURATION);
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [isInView, phase]);
+  const phase = mode === 'done' ? 8 : activePhase;
 
   return (
     <section
-      ref={ref}
       className="min-h-screen relative bg-[#050505] py-20 px-4 overflow-hidden"
       style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}
     >

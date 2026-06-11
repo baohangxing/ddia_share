@@ -3,124 +3,104 @@ import {
   useContext,
   useState,
   useCallback,
-  useRef,
+  useMemo,
   type ReactNode,
-} from 'react';
+} from "react";
+
+/** Max phase index for each chapter (0–8) */
+const chapterMaxPhases: number[] = [5, 10, 1, 1, 3, 8, 5, 8, 16];
+
+interface SectionState {
+  mode: "hidden" | "play" | "done";
+  activePhase: number;
+}
 
 interface SectionVisibilityState {
-  /** Sections 0..revealedUpTo have their content visible */
-  revealedUpTo: number;
-  /** Sections that have finished their animation sequence */
-  completedSections: Set<number>;
-  /** Sections that should show final state immediately (skip animation) */
-  skipSections: Set<number>;
+  currentChapter: number;
+  currentPhase: number;
 }
 
-interface SectionVisibilityContextType extends SectionVisibilityState {
-  /** Called by a section when its animation sequence completes */
-  markComplete: (index: number) => void;
-  /** Navigate to a section (from nav click, keyboard, or scroll) */
+interface SectionVisibilityContextType {
+  currentChapter: number;
+  currentPhase: number;
+  /** Called on background click — advances one phase */
+  advancePhase: () => void;
+  /** Called from nav bar — jump to chapter, start from phase 0 */
   navigateToSection: (index: number) => void;
-  /** Whether a section should skip animation and show final state */
-  shouldSkip: (index: number) => boolean;
-  /** Whether a section's content should be rendered at all */
-  isVisible: (index: number) => boolean;
-  /** Whether any revealed section is still animating */
-  isAnimating: () => boolean;
+  /** Derive display state for a given section index */
+  getSectionState: (index: number) => SectionState;
 }
 
-const SectionVisibilityContext = createContext<SectionVisibilityContextType | null>(null);
+const SectionVisibilityContext =
+  createContext<SectionVisibilityContextType | null>(null);
 
 export function SectionVisibilityProvider({
   children,
-  sectionCount,
 }: {
   children: ReactNode;
   sectionCount: number;
 }) {
   const [state, setState] = useState<SectionVisibilityState>({
-    revealedUpTo: 0,
-    completedSections: new Set(),
-    skipSections: new Set(),
+    currentChapter: 0,
+    currentPhase: 0,
   });
 
-  const completedRef = useRef<Set<number>>(new Set());
-
-  const markComplete = useCallback((index: number) => {
-    completedRef.current.add(index);
-    setState(prev => {
-      const newCompleted = new Set(prev.completedSections);
-      newCompleted.add(index);
-
-      const nextRevealed = Math.min(
-        sectionCount - 1,
-        Math.max(prev.revealedUpTo, index + 1),
-      );
-
-      return {
-        ...prev,
-        completedSections: newCompleted,
-        revealedUpTo: nextRevealed,
-      };
-    });
-  }, [sectionCount]);
-
-  const navigateToSection = useCallback((index: number) => {
-    const clamped = Math.max(0, Math.min(sectionCount - 1, index));
-
-    setState(prev => {
-      // Forward: reveal all intermediate sections in skip mode
-      if (clamped > prev.revealedUpTo) {
-        const newSkip = new Set(prev.skipSections);
-        const newCompleted = new Set(prev.completedSections);
-        for (let i = prev.revealedUpTo; i < clamped; i++) {
-          newSkip.add(i);
-          newCompleted.add(i);
-          completedRef.current.add(i);
-        }
+  const advancePhase = useCallback(() => {
+    setState((prev) => {
+      const max = chapterMaxPhases[prev.currentChapter];
+      if (prev.currentPhase < max) {
         return {
-          revealedUpTo: clamped,
-          completedSections: newCompleted,
-          skipSections: newSkip,
+          currentChapter: prev.currentChapter,
+          currentPhase: prev.currentPhase + 1,
         };
       }
-
-      // Backward or same position: no state change at all.
-      // Progress is monotonically increasing — sections never un-reveal.
+      // Chapter complete — advance to next chapter phase 0
+      if (prev.currentChapter < chapterMaxPhases.length - 1) {
+        return {currentChapter: prev.currentChapter + 1, currentPhase: 0};
+      }
+      // Already at last chapter last phase — no-op
       return prev;
     });
-  }, [sectionCount]);
+  }, []);
 
-  const shouldSkip = useCallback(
-    (index: number) => state.skipSections.has(index),
-    [state.skipSections],
-  );
+  const navigateToSection = useCallback((index: number) => {
+    const clamped = Math.max(0, Math.min(chapterMaxPhases.length - 1, index));
+    setState({currentChapter: clamped, currentPhase: 0});
+  }, []);
 
-  const isVisible = useCallback(
-    (index: number) => index <= state.revealedUpTo,
-    [state.revealedUpTo],
-  );
-
-  const isAnimating = useCallback(() => {
-    for (let i = state.revealedUpTo; i >= 0; i--) {
-      if (!state.completedSections.has(i)) {
-        return true;
+  const getSectionState = useCallback(
+    (index: number): SectionState => {
+      if (state.currentChapter < index) {
+        return {mode: "hidden", activePhase: 0};
       }
-    }
-    return false;
-  }, [state.revealedUpTo, state.completedSections]);
+      if (state.currentChapter > index) {
+        return {mode: "done", activePhase: chapterMaxPhases[index]};
+      }
+      // currentChapter === index
+      return {mode: "play", activePhase: state.currentPhase};
+    },
+    [state.currentChapter, state.currentPhase],
+  );
+
+  const value = useMemo(
+    () => ({
+      currentChapter: state.currentChapter,
+      currentPhase: state.currentPhase,
+      advancePhase,
+      navigateToSection,
+      getSectionState,
+    }),
+    [
+      state.currentChapter,
+      state.currentPhase,
+      advancePhase,
+      navigateToSection,
+      getSectionState,
+    ],
+  );
 
   return (
-    <SectionVisibilityContext.Provider
-      value={{
-        ...state,
-        markComplete,
-        navigateToSection,
-        shouldSkip,
-        isVisible,
-        isAnimating,
-      }}
-    >
+    <SectionVisibilityContext.Provider value={value}>
       {children}
     </SectionVisibilityContext.Provider>
   );
@@ -130,26 +110,23 @@ export function useSectionVisibility(): SectionVisibilityContextType {
   const ctx = useContext(SectionVisibilityContext);
   if (!ctx) {
     throw new Error(
-      'useSectionVisibility must be used within SectionVisibilityProvider',
+      "useSectionVisibility must be used within SectionVisibilityProvider",
     );
   }
   return ctx;
 }
 
-export function useSectionPlayMode(sectionIndex: number): 'hidden' | 'skip' | 'play' {
-  const { completedSections, isVisible, shouldSkip } = useSectionVisibility();
+/**
+ * Legacy hook — wraps getSectionState for components still using playMode.
+ * Prefer getSectionState directly for new code.
+ */
+export function useSectionPlayMode(
+  sectionIndex: number,
+): "hidden" | "skip" | "play" {
+  const {getSectionState} = useSectionVisibility();
+  const {mode} = getSectionState(sectionIndex);
 
-  if (completedSections.has(sectionIndex)) {
-    return 'skip';
-  }
-
-  if (!isVisible(sectionIndex)) {
-    return 'hidden';
-  }
-
-  if (shouldSkip(sectionIndex)) {
-    return 'skip';
-  }
-
-  return 'play';
+  if (mode === "hidden") return "hidden";
+  if (mode === "done") return "skip";
+  return "play";
 }

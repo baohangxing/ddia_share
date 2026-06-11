@@ -1,8 +1,7 @@
-import {motion, AnimatePresence, useInView} from "framer-motion";
-import {useState, useEffect, useRef} from "react";
+import {motion, AnimatePresence} from "framer-motion";
 import {ArchitectureDiagram} from "../shared/ArchitectureDiagram";
 import {ChapterBadge} from "../shared/ChapterBadge";
-import {useSectionPlayMode} from "../../contexts/SectionVisibilityContext";
+import {useSectionPlayMode, useSectionVisibility} from "../../contexts/SectionVisibilityContext";
 
 // ── Phase enums ──
 const PHASE = {
@@ -183,34 +182,9 @@ export default function Section09_Finale() {
 
   const contentVisible = playMode !== 'hidden';
 
-  const [phase, setPhase] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, {once: true, margin: "-200px"});
-
-  // ── Phase transition timer chain ──
-  useEffect(() => {
-    if (!isInView) return;
-    const t: ReturnType<typeof setTimeout>[] = [];
-
-    t.push(setTimeout(() => setPhase(PHASE.SIMPLE), 1200));
-    t.push(setTimeout(() => setPhase(PHASE.LOAD_BALANCER), 2800));
-    t.push(setTimeout(() => setPhase(PHASE.CACHE_KAFKA), 4400));
-    t.push(setTimeout(() => setPhase(PHASE.SHARDING), 6000));
-    t.push(setTimeout(() => setPhase(PHASE.REPLICATION), 7600));
-    t.push(setTimeout(() => setPhase(PHASE.TRANSACTIONS), 9200));
-    t.push(setTimeout(() => setPhase(PHASE.CONSENSUS), 10800));
-    t.push(setTimeout(() => setPhase(PHASE.STORAGE), 12400));
-    t.push(setTimeout(() => setPhase(PHASE.QUOTE), 14400));
-    t.push(setTimeout(() => setPhase(PHASE.KEYWORD_1), 16400));
-    t.push(setTimeout(() => setPhase(PHASE.KEYWORD_2), 17900));
-    t.push(setTimeout(() => setPhase(PHASE.KEYWORD_3), 19400));
-    t.push(setTimeout(() => setPhase(PHASE.KEYWORD_4), 20900));
-    t.push(setTimeout(() => setPhase(PHASE.KEYWORD_5), 22400));
-    t.push(setTimeout(() => setPhase(PHASE.KEYWORD_6), 23900));
-    t.push(setTimeout(() => setPhase(PHASE.END), 25900));
-
-    return () => t.forEach(clearTimeout);
-  }, [isInView]);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
+  const phase = mode === 'done' ? 16 : activePhase;
 
   // ── Current diagram for this phase (fallback to simple) ──
   const diagram = PHASE_NODES[phase]
@@ -222,7 +196,6 @@ export default function Section09_Finale() {
 
   return (
     <section
-      ref={sectionRef}
       className="min-h-screen relative bg-[#050505] py-16 px-4 flex flex-col items-center justify-center overflow-hidden"
       style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}
     >
@@ -240,7 +213,7 @@ export default function Section09_Finale() {
         {/* ===== 1. Title ===== */}
         <motion.h1
           initial={{opacity: 0, y: 40}}
-          animate={isInView ? {opacity: 1, y: 0} : {}}
+          animate={{opacity: 1, y: 0}}
           transition={{duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94]}}
           className="text-4xl md:text-6xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent"
         >
@@ -250,7 +223,7 @@ export default function Section09_Finale() {
         {/* ===== 2. Subtitle ===== */}
         <motion.p
           initial={{opacity: 0}}
-          animate={isInView ? {opacity: 1} : {}}
+          animate={{opacity: 1}}
           transition={{duration: 0.6, delay: 0.4}}
           className="text-center text-sm text-[#555] mb-10 font-mono"
         >

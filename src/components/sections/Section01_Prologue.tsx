@@ -3,8 +3,8 @@ import {Typewriter} from "../shared/Typewriter";
 import {CodeBlock} from "../shared/CodeBlock";
 import {ArchitectureDiagram} from "../shared/ArchitectureDiagram";
 import {AnimatedSequence} from "../shared/AnimatedNumber";
-import {useSectionPlayMode, useSectionVisibility} from "../../contexts/SectionVisibilityContext";
-import {useState, useRef, useEffect, useCallback} from "react";
+import {useSectionVisibility} from "../../contexts/SectionVisibilityContext";
+import {useRef, useCallback} from "react";
 
 const NARRATIVE =
   "\u2615 咖啡 + Cursor, 我写下了提示词：\n万能的ai,请给我写一个简单的微博。";
@@ -25,81 +25,17 @@ const SECTION_INDEX = 0;
 
 export default function Section01_Prologue() {
   const sectionRef = useRef<HTMLElement>(null);
-  const playMode = useSectionPlayMode(SECTION_INDEX);
-  const { markComplete } = useSectionVisibility();
-  const [phase, setPhase] = useState(-1);
+  const { getSectionState, advancePhase } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
+  const phase = mode === 'done' ? 5 : activePhase;
   const typewriterCompleted = useRef(false);
-  const hasStarted = useRef(false);
-  const skipActive = useRef(false);
 
-  // Kick off the sequence when playMode becomes 'play'
-  useEffect(() => {
-    if (playMode === 'play' && !hasStarted.current) {
-      hasStarted.current = true;
-      setPhase(0);
-    }
-  }, [playMode]);
-
-  // When in skip mode, show everything immediately and block further transitions
-  useEffect(() => {
-    if (playMode === 'skip') {
-      skipActive.current = true;
-      setPhase(5);
-      markComplete(SECTION_INDEX);
-    }
-  }, [playMode, markComplete]);
-
-  // Phase 0 → 1: title fade-in, then typewriter
-  useEffect(() => {
-    if (skipActive.current || phase !== 0) return;
-    const t = setTimeout(() => setPhase(1), 1200);
-    return () => clearTimeout(t);
-  }, [phase]);
-
-  // After typewriter completes → phase 2: code + architecture + thought
+  // After typewriter completes → advance to phase 2: code + architecture + thought
   const handleTypingComplete = useCallback(() => {
     if (typewriterCompleted.current) return;
     typewriterCompleted.current = true;
-    setPhase(2);
-  }, []);
-
-  // Phase 2 → 3: show content, then pause
-  // Phase 3 → 4: 3-second pause, then user growth
-  // Phase 4 → 5: growth animation, then complete
-  useEffect(() => {
-    if (skipActive.current) return;
-    if (phase === 2) {
-      const t = setTimeout(() => setPhase(3), 4000);
-      return () => clearTimeout(t);
-    }
-    if (phase === 3) {
-      const t = setTimeout(() => setPhase(4), 3000);
-      return () => clearTimeout(t);
-    }
-    if (phase === 4) {
-      const t = setTimeout(() => setPhase(5), 4500);
-      return () => clearTimeout(t);
-    }
-  }, [phase]);
-
-  // Fallback: if typewriter doesn't complete within 8s, force next phase
-  useEffect(() => {
-    if (skipActive.current || phase !== 1) return;
-    const fallback = setTimeout(() => {
-      if (!typewriterCompleted.current) {
-        typewriterCompleted.current = true;
-        setPhase(2);
-      }
-    }, 8000);
-    return () => clearTimeout(fallback);
-  }, [phase]);
-
-  // Notify context when animation completes
-  useEffect(() => {
-    if (phase === 5) {
-      markComplete(SECTION_INDEX);
-    }
-  }, [phase, markComplete]);
+    advancePhase();
+  }, [advancePhase]);
 
   return (
     <section

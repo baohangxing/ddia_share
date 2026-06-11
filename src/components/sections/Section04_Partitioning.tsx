@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
 import { CodeBlock } from '../shared/CodeBlock';
 import { ArchitectureDiagram } from '../shared/ArchitectureDiagram';
 import { ChapterBadge } from '../shared/ChapterBadge';
@@ -8,23 +7,19 @@ import { AlertBanner } from '../shared/AlertBanner';
 import { AnimatedNumber } from '../shared/AnimatedNumber';
 import { Typewriter } from '../shared/Typewriter';
 import { ddiaChapters } from '../../data/ddiaContent';
-import { useSectionPlayMode } from '../../contexts/SectionVisibilityContext';
+import { useSectionPlayMode, useSectionVisibility } from '../../contexts/SectionVisibilityContext';
 
 const chapter = ddiaChapters[2]; // Chapter 6 - Partitioning
 
 export default function Section04_Partitioning() {
   const SECTION_INDEX = 3;
   const playMode = useSectionPlayMode(SECTION_INDEX);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
 
   const contentVisible = playMode !== 'hidden';
 
-  const [showHotSpot, setShowHotSpot] = useState(false);
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setShowHotSpot(true), 1500);
-    const t2 = setTimeout(() => setShowHotSpot(true), 4000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+  const showHotSpot = activePhase >= 1 || mode === 'done';
 
   // Architecture diagram data
   const balancedNodes = [

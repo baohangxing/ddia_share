@@ -9,10 +9,7 @@ import {TechCard} from "../shared/TechCard";
 import {Typewriter} from "../shared/Typewriter";
 import {MysqlExplainDiff} from "../shared/MysqlExplainDiff";
 import {ddiaChapters} from "../../data/ddiaContent";
-import {
-  useSectionPlayMode,
-  useSectionVisibility,
-} from "../../contexts/SectionVisibilityContext";
+import { useSectionVisibility } from "../../contexts/SectionVisibilityContext";
 
 const chapter3 = ddiaChapters[0];
 
@@ -58,95 +55,10 @@ const cpuPercents = [10, 20, 50, 80, 100];
 
 // ── COMPONENT ──
 export function Section02_Index() {
-  const [phase, setPhase] = useState(0);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(1);
+  const phase = mode === 'done' ? 10 : activePhase;
   const sectionRef = useRef<HTMLDivElement>(null);
-  const playMode = useSectionPlayMode(1);
-  const {markComplete} = useSectionVisibility();
-  const hasStarted = useRef(false);
-  const skipActive = useRef(false);
-
-  useEffect(() => {
-    if (playMode === "play" && !hasStarted.current) {
-      hasStarted.current = true;
-      const timers: ReturnType<typeof setTimeout>[] = [];
-
-      // phase 0 → 1: show SQL table
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(1);
-        }, 1500),
-      );
-      // phase 1 → 2: show timeline query
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(2);
-        }, 3500),
-      );
-      // phase 2 → 3: start data growth animation
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(3);
-        }, 5000),
-      );
-      // phase 3 → 4: CPU warning
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(4);
-        }, 10000),
-      );
-      // phase 4 → 5: MySQL red
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(5);
-        }, 12000),
-      );
-      // phase 5 → 6: Alert
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(6);
-        }, 14000),
-      );
-      // phase 6 → 7: dialogue
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(7);
-        }, 16000),
-      );
-      // phase 7 → 8: EXPLAIN scan animation
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(8);
-        }, 18000),
-      );
-      // phase 8 → 9: Solution
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(9);
-        }, 23000),
-      );
-      // phase 9 → 10: result
-      timers.push(
-        setTimeout(() => {
-          if (!skipActive.current) setPhase(10);
-        }, 26000),
-      );
-
-      return () => timers.forEach(clearTimeout);
-    }
-
-    if (playMode === "skip") {
-      skipActive.current = true;
-      setPhase(10);
-      markComplete(1);
-    }
-  }, [playMode, markComplete]);
-
-  // Notify context when animation completes
-  useEffect(() => {
-    if (phase === 10) {
-      markComplete(1);
-    }
-  }, [phase, markComplete]);
 
   return (
     <section

@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState, useRef} from "react";
 import {useScrollProgress} from "./hooks/useScrollProgress";
-import {useScrollLock} from "./hooks/useScrollLock";
+import {useSectionNavigation} from "./hooks/useSectionNavigation";
 import {usePresentationMode} from "./hooks/usePresentationMode";
 import {
   SectionVisibilityProvider,
@@ -36,28 +36,32 @@ function AppContent() {
   const [entered, setEntered] = useState(false);
   const {progress} = useScrollProgress(sections.length);
   const {isPresentation, togglePresentation} = usePresentationMode();
-  const {revealedUpTo, navigateToSection} = useSectionVisibility();
-  const {scrollToSection} = useScrollLock({totalSections: sections.length});
-  const prevRevealedRef = useRef(revealedUpTo);
+  const {currentChapter, advancePhase, navigateToSection} =
+    useSectionVisibility();
+  const {scrollToSection} = useSectionNavigation({
+    totalSections: sections.length,
+  });
+  const prevChapterRef = useRef(currentChapter);
 
-  // Auto-scroll to newly revealed section
+  // Auto-scroll to newly revealed chapter
   useEffect(() => {
-    if (revealedUpTo > prevRevealedRef.current) {
-      scrollToSection(revealedUpTo);
+    if (currentChapter > prevChapterRef.current) {
+      scrollToSection(currentChapter);
     }
-    prevRevealedRef.current = revealedUpTo;
-  }, [revealedUpTo, scrollToSection]);
+    prevChapterRef.current = currentChapter;
+  }, [currentChapter, scrollToSection]);
 
   const handleNavigate = useCallback(
     (index: number) => {
       navigateToSection(index);
-      // Scroll after a small delay so DOM updates first
-      setTimeout(() => {
-        scrollToSection(index);
-      }, 50);
     },
-    [navigateToSection, scrollToSection],
+    [navigateToSection],
   );
+
+  // Global background click: advance one phase
+  const handleBackgroundClick = useCallback(() => {
+    advancePhase();
+  }, [advancePhase]);
 
   if (!entered) {
     return <HomePage onEnter={() => setEntered(true)} />;
@@ -67,36 +71,38 @@ function AppContent() {
     <AppShell progress={progress}>
       <Navigation
         sections={sections}
-        currentSection={revealedUpTo}
+        currentSection={currentChapter}
         onNavigate={handleNavigate}
       />
 
-      <div id="section-0">
-        <Section01_Prologue />
-      </div>
-      <div id="section-1">
-        <Section02_Index />
-      </div>
-      <div id="section-2">
-        <Section03_Replication />
-      </div>
-      <div id="section-3">
-        <Section04_Partitioning />
-      </div>
-      <div id="section-4">
-        <Section05_Streams />
-      </div>
-      <div id="section-5">
-        <Section06_Transactions />
-      </div>
-      <div id="section-6">
-        <Section07_Consistency />
-      </div>
-      <div id="section-7">
-        <Section08_Consensus />
-      </div>
-      <div id="section-8">
-        <Section09_Finale />
+      <div onClick={handleBackgroundClick}>
+        <div id="section-0">
+          <Section01_Prologue />
+        </div>
+        <div id="section-1">
+          <Section02_Index />
+        </div>
+        <div id="section-2">
+          <Section03_Replication />
+        </div>
+        <div id="section-3">
+          <Section04_Partitioning />
+        </div>
+        <div id="section-4">
+          <Section05_Streams />
+        </div>
+        <div id="section-5">
+          <Section06_Transactions />
+        </div>
+        <div id="section-6">
+          <Section07_Consistency />
+        </div>
+        <div id="section-7">
+          <Section08_Consensus />
+        </div>
+        <div id="section-8">
+          <Section09_Finale />
+        </div>
       </div>
 
       {!isPresentation && (
@@ -108,7 +114,7 @@ function AppContent() {
 
       {isPresentation && (
         <div className="fixed bottom-4 left-4 text-xs text-[#555] font-mono">
-          按 ↓ → 切换章节 | 按 ↑ ← 向上滚动 | 按 Escape 退出
+          点击空白区域切换章节 | 按 Escape 退出
         </div>
       )}
     </AppShell>

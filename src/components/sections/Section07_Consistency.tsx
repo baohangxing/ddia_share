@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { ArchitectureDiagram } from '../shared/ArchitectureDiagram';
 import { ChapterBadge } from '../shared/ChapterBadge';
 import { TechCard } from '../shared/TechCard';
@@ -7,7 +7,7 @@ import { AlertBanner } from '../shared/AlertBanner';
 import { AnimatedNumber } from '../shared/AnimatedNumber';
 import { Typewriter } from '../shared/Typewriter';
 import { ddiaChapters } from '../../data/ddiaContent';
-import { useSectionPlayMode } from '../../contexts/SectionVisibilityContext';
+import { useSectionPlayMode, useSectionVisibility } from '../../contexts/SectionVisibilityContext';
 
 const chapter = ddiaChapters[5]; // Chapter 9 - Consistency & Consensus
 
@@ -305,20 +305,13 @@ export default function Section07_Consistency() {
   const SECTION_INDEX = 6;
   const playMode = useSectionPlayMode(SECTION_INDEX);
 
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
+
   const contentVisible = playMode !== 'hidden';
 
-  const [phase, setPhase] = useState(0);
+  const phase = mode === 'done' ? 5 : activePhase;
   const [typingDone, setTypingDone] = useState(false);
-
-  // Phased animation via timeouts
-  useEffect(() => {
-    const t0 = setTimeout(() => setPhase(1), 2500);   // Title done → datacenters
-    const t1 = setTimeout(() => setPhase(2), 5000);   // Datacenters → normal message flow
-    const t2 = setTimeout(() => setPhase(3), 8500);   // Normal → reordered
-    const t3 = setTimeout(() => setPhase(4), 11500);  // Reorder → alert
-    const t4 = setTimeout(() => setPhase(5), 14500);  // Alert → comparison
-    return () => { clearTimeout(t0); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
-  }, []);
 
   return (
     <section className="min-h-screen relative bg-[#050505] py-16 px-4 overflow-hidden" style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}>

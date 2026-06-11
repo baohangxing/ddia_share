@@ -1,6 +1,5 @@
-import {useState, useEffect} from "react";
 import {motion, AnimatePresence} from "framer-motion";
-import {useSectionPlayMode} from "../../contexts/SectionVisibilityContext";
+import {useSectionPlayMode, useSectionVisibility} from "../../contexts/SectionVisibilityContext";
 import {ddiaChapters} from "../../data/ddiaContent";
 import {CodeBlock} from "../shared/CodeBlock";
 import {ArchitectureDiagram} from "../shared/ArchitectureDiagram";
@@ -137,19 +136,9 @@ function LeaderReplicaDiagram() {
   );
 }
 
-function ReplicationLagAnimation() {
-  const [phase, setPhase] = useState<"syncing" | "done">("syncing");
+function ReplicationLagAnimation({ done }: { done: boolean }) {
   const playMode = useSectionPlayMode(2);
-
-  useEffect(() => {
-    if (playMode === 'play') {
-      const timer = setTimeout(() => setPhase("done"), 3500);
-      return () => clearTimeout(timer);
-    }
-    if (playMode === 'skip') {
-      setPhase("done");
-    }
-  }, [playMode]);
+  const phase = (done || playMode === 'skip') ? "done" : "syncing";
 
   return (
     <div className="my-6">
@@ -275,6 +264,9 @@ function ReplicationLagAnimation() {
 export default function Section03_Replication() {
   const SECTION_INDEX = 2;
   const playMode = useSectionPlayMode(SECTION_INDEX);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
+  const done = activePhase >= 1 || mode === 'done';
 
   const contentVisible = playMode !== 'hidden';
 
@@ -422,7 +414,7 @@ const timeline = await db.replica.timeline.findMany({
             用户刚发了一条「Hello DDIA」→ 立刻刷新看时间线 →
           </p>
 
-          <ReplicationLagAnimation />
+          <ReplicationLagAnimation done={done} />
         </motion.div>
 
         {/* --- 7. Replication Lag: Strong vs Eventual Consistency --- */}

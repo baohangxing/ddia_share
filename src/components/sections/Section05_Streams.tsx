@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
 import { CodeBlock } from '../shared/CodeBlock';
 import { ArchitectureDiagram } from '../shared/ArchitectureDiagram';
 import { ChapterBadge } from '../shared/ChapterBadge';
@@ -8,7 +7,7 @@ import { AlertBanner } from '../shared/AlertBanner';
 import { AnimatedNumber } from '../shared/AnimatedNumber';
 import { Typewriter } from '../shared/Typewriter';
 import { ddiaChapters } from '../../data/ddiaContent';
-import { useSectionPlayMode } from '../../contexts/SectionVisibilityContext';
+import { useSectionPlayMode, useSectionVisibility } from '../../contexts/SectionVisibilityContext';
 
 const chapter = ddiaChapters[3]; // Chapter 11 - Stream Processing
 
@@ -47,19 +46,12 @@ const waterArrows = [
 export default function Section05_Streams() {
   const SECTION_INDEX = 4;
   const playMode = useSectionPlayMode(SECTION_INDEX);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
 
   const contentVisible = playMode !== 'hidden';
 
-  const [showKafka, setShowKafka] = useState(false);
-  const [showAnalogy, setShowAnalogy] = useState(false);
-  const [showArch, setShowArch] = useState(false);
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setShowKafka(true), 2500);
-    const t2 = setTimeout(() => setShowAnalogy(true), 5000);
-    const t3 = setTimeout(() => setShowArch(true), 7000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
+  const phase = mode === 'done' ? 3 : activePhase;
 
   return (
     <section className="min-h-screen relative max-w-4xl mx-auto px-4 py-20" style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}>
@@ -183,7 +175,7 @@ await Promise.all(
         </motion.div>
 
         {/* ===== 6. Kafka Solution (delayed reveal) ===== */}
-        {showKafka && (
+        {phase >= 1 && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,7 +239,7 @@ while (true) {
         )}
 
         {/* ===== 7. Water/Flow Analogy ===== */}
-        {showAnalogy && (
+        {phase >= 2 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -283,7 +275,7 @@ while (true) {
         )}
 
         {/* ===== 8. Architecture: Producer → Kafka → Consumers ===== */}
-        {showArch && (
+        {phase >= 3 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

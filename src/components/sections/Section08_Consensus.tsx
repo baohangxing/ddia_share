@@ -1,12 +1,12 @@
-import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { ArchitectureDiagram } from '../shared/ArchitectureDiagram';
 import { ChapterBadge } from '../shared/ChapterBadge';
 import { TechCard } from '../shared/TechCard';
 import { AlertBanner } from '../shared/AlertBanner';
 import { AnimatedNumber } from '../shared/AnimatedNumber';
 import { ddiaChapters } from '../../data/ddiaContent';
-import { useSectionPlayMode } from '../../contexts/SectionVisibilityContext';
+import { useSectionPlayMode, useSectionVisibility } from '../../contexts/SectionVisibilityContext';
 
 const chapter = ddiaChapters[5]; // Chapter 9 - Consistency & Consensus
 
@@ -143,59 +143,16 @@ export default function Section08_Consensus() {
 
   const contentVisible = playMode !== 'hidden';
 
-  const [phase, setPhase] = useState(0);
+  const { getSectionState } = useSectionVisibility();
+  const { mode, activePhase } = getSectionState(SECTION_INDEX);
+  const phase = mode === 'done' ? 8 : activePhase;
   const [inventory, setInventory] = useState(1);
   const [inventoryCrash, setInventoryCrash] = useState(false);
   const [majorityGreen, setMajorityGreen] = useState(false);
   const [logMajorityGreen, setLogMajorityGreen] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: '-200px' });
-
-  useEffect(() => {
-    if (!isInView) return;
-
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    // Phase 0: Title visible immediately via whileInView
-    timers.push(setTimeout(() => setPhase(PHASE.INVENTORY), 1500));
-
-    // Phase 1 → 2: Show race condition
-    timers.push(setTimeout(() => setPhase(PHASE.RACE), 3500));
-
-    // Phase 2 → 3: Oversold!
-    timers.push(setTimeout(() => {
-      setInventory(0);
-      setInventoryCrash(true);
-      setPhase(PHASE.OVERSOLD);
-    }, 6000));
-
-    // Phase 3 → 4: Question
-    timers.push(setTimeout(() => setPhase(PHASE.QUESTION), 8500));
-
-    // Phase 4 → 5: Raft Leader Election
-    timers.push(setTimeout(() => {
-      setPhase(PHASE.RAFT_LEADER);
-      // After a delay, show majority green
-      setTimeout(() => setMajorityGreen(true), 2000);
-    }, 11000));
-
-    // Phase 5 → 6: Log Replication
-    timers.push(setTimeout(() => {
-      setPhase(PHASE.LOG_REPLICATION);
-      setTimeout(() => setLogMajorityGreen(true), 2000);
-    }, 16000));
-
-    // Phase 6 → 7: Cards
-    timers.push(setTimeout(() => setPhase(PHASE.CARDS), 21000));
-
-    // Phase 7 → 8: Badge
-    timers.push(setTimeout(() => setPhase(PHASE.BADGE), 24000));
-
-    return () => timers.forEach(clearTimeout);
-  }, [isInView]);
 
   return (
-    <section ref={sectionRef} className="min-h-screen relative bg-[#050505] py-16 px-4" style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}>
+    <section className="min-h-screen relative bg-[#050505] py-16 px-4" style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}>
       {/* Background grid */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
