@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
 import { ArchitectureDiagram } from '../shared/ArchitectureDiagram';
 import { ChapterBadge } from '../shared/ChapterBadge';
 import { TechCard } from '../shared/TechCard';
@@ -146,10 +145,10 @@ export default function Section08_Consensus() {
   const { getSectionState } = useSectionVisibility();
   const { mode, activePhase } = getSectionState(SECTION_INDEX);
   const phase = mode === 'done' ? 8 : activePhase;
-  const [inventory, setInventory] = useState(1);
-  const [inventoryCrash, setInventoryCrash] = useState(false);
-  const [majorityGreen, setMajorityGreen] = useState(false);
-  const [logMajorityGreen, setLogMajorityGreen] = useState(false);
+  const inventory = 1;
+  const inventoryCrash = false;
+  const majorityGreen = false;
+  const logMajorityGreen = false;
 
   return (
     <section className="min-h-screen relative bg-[#050505] py-16 px-4" style={{ opacity: contentVisible ? 1 : 0, pointerEvents: contentVisible ? 'auto' : 'none', transition: 'opacity 0.5s' }}>
