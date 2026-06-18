@@ -1,4 +1,4 @@
-import {motion, AnimatePresence} from "framer-motion";
+import {motion} from "framer-motion";
 import {ArchitectureDiagram} from "../shared/ArchitectureDiagram";
 import {ChapterBadge} from "../shared/ChapterBadge";
 import {TechCard} from "../shared/TechCard";
@@ -10,11 +10,51 @@ import {PageBlock} from "../shared/PageBlock";
 const chapter = ddiaChapters[5];
 
 const raceNodes = [
-  {id: "user-a", label: "👤 User A", x: 60, y: 40, width: 90, height: 36, color: "primary" as const},
-  {id: "user-b", label: "👤 User B", x: 60, y: 140, width: 90, height: 36, color: "warning" as const},
-  {id: "node-a", label: "Node A\n库存=1", x: 240, y: 40, width: 90, height: 50, color: "primary" as const},
-  {id: "node-b", label: "Node B\n库存=1", x: 240, y: 140, width: 90, height: 50, color: "warning" as const},
-  {id: "stock", label: "实际库存: 1", x: 420, y: 90, width: 110, height: 36, color: "default" as const},
+  {
+    id: "user-a",
+    label: "👤 User A",
+    x: 60,
+    y: 40,
+    width: 90,
+    height: 36,
+    color: "primary" as const,
+  },
+  {
+    id: "user-b",
+    label: "👤 User B",
+    x: 60,
+    y: 140,
+    width: 90,
+    height: 36,
+    color: "warning" as const,
+  },
+  {
+    id: "node-a",
+    label: "Node A\n库存=1",
+    x: 240,
+    y: 40,
+    width: 90,
+    height: 50,
+    color: "primary" as const,
+  },
+  {
+    id: "node-b",
+    label: "Node B\n库存=1",
+    x: 240,
+    y: 140,
+    width: 90,
+    height: 50,
+    color: "warning" as const,
+  },
+  {
+    id: "stock",
+    label: "实际库存: 1",
+    x: 420,
+    y: 90,
+    width: 110,
+    height: 36,
+    color: "default" as const,
+  },
 ];
 
 const raceArrows = [
@@ -25,11 +65,51 @@ const raceArrows = [
 ];
 
 const raftElectionNodes = [
-  {id: "candidate", label: "Candidate\n(发起选举)", x: 60, y: 80, width: 100, height: 50, color: "primary" as const},
-  {id: "f1", label: "Follower 1", x: 220, y: 30, width: 80, height: 36, color: "default" as const},
-  {id: "f2", label: "Follower 2", x: 220, y: 90, width: 80, height: 36, color: "default" as const},
-  {id: "f3", label: "Follower 3", x: 220, y: 150, width: 80, height: 36, color: "default" as const},
-  {id: "leader-badge", label: "👑 Leader", x: 400, y: 80, width: 90, height: 40, color: "success" as const},
+  {
+    id: "candidate",
+    label: "Candidate\n(发起选举)",
+    x: 60,
+    y: 80,
+    width: 100,
+    height: 50,
+    color: "primary" as const,
+  },
+  {
+    id: "f1",
+    label: "Follower 1",
+    x: 220,
+    y: 30,
+    width: 80,
+    height: 36,
+    color: "default" as const,
+  },
+  {
+    id: "f2",
+    label: "Follower 2",
+    x: 220,
+    y: 90,
+    width: 80,
+    height: 36,
+    color: "default" as const,
+  },
+  {
+    id: "f3",
+    label: "Follower 3",
+    x: 220,
+    y: 150,
+    width: 80,
+    height: 36,
+    color: "default" as const,
+  },
+  {
+    id: "leader-badge",
+    label: "👑 Leader",
+    x: 400,
+    y: 80,
+    width: 90,
+    height: 40,
+    color: "success" as const,
+  },
 ];
 
 const raftElectionArrows = [
@@ -42,11 +122,51 @@ const raftElectionArrows = [
 ];
 
 const logReplicationNodes = [
-  {id: "leader", label: "👑 Leader", x: 60, y: 80, width: 90, height: 40, color: "success" as const},
-  {id: "flr1", label: "Follower A", x: 240, y: 30, width: 80, height: 36, color: "default" as const},
-  {id: "flr2", label: "Follower B", x: 240, y: 90, width: 80, height: 36, color: "default" as const},
-  {id: "flr3", label: "Follower C", x: 240, y: 150, width: 80, height: 36, color: "default" as const},
-  {id: "committed", label: "✅ Committed", x: 420, y: 80, width: 100, height: 40, color: "success" as const},
+  {
+    id: "leader",
+    label: "👑 Leader",
+    x: 60,
+    y: 80,
+    width: 90,
+    height: 40,
+    color: "success" as const,
+  },
+  {
+    id: "flr1",
+    label: "Follower A",
+    x: 240,
+    y: 30,
+    width: 80,
+    height: 36,
+    color: "default" as const,
+  },
+  {
+    id: "flr2",
+    label: "Follower B",
+    x: 240,
+    y: 90,
+    width: 80,
+    height: 36,
+    color: "default" as const,
+  },
+  {
+    id: "flr3",
+    label: "Follower C",
+    x: 240,
+    y: 150,
+    width: 80,
+    height: 36,
+    color: "default" as const,
+  },
+  {
+    id: "committed",
+    label: "✅ Committed",
+    x: 420,
+    y: 80,
+    width: 100,
+    height: 40,
+    color: "success" as const,
+  },
 ];
 
 const logReplicationArrows = [
@@ -57,7 +177,13 @@ const logReplicationArrows = [
   {from: "flr2", to: "committed", animated: false, label: "✅"},
 ];
 
-function InventoryCounter({remaining, animateCrash}: {remaining: number; animateCrash: boolean}) {
+function InventoryCounter({
+  remaining,
+  animateCrash,
+}: {
+  remaining: number;
+  animateCrash: boolean;
+}) {
   return (
     <motion.div
       initial={{opacity: 0, scale: 0.9}}
@@ -92,17 +218,31 @@ function BossTitle() {
     >
       <motion.div
         className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#ef444433] bg-[#ef444410] mb-4"
-        animate={{boxShadow: ["0 0 5px #ef444400", "0 0 25px #ef444444", "0 0 5px #ef444400"]}}
+        animate={{
+          boxShadow: [
+            "0 0 5px #ef444400",
+            "0 0 25px #ef444444",
+            "0 0 5px #ef444400",
+          ],
+        }}
         transition={{duration: 2, repeat: Infinity}}
       >
         <span className="text-lg">👹</span>
-        <span className="text-xs font-mono text-[#f87171] uppercase tracking-widest">Final Boss</span>
+        <span className="text-xs font-mono text-[#f87171] uppercase tracking-widest">
+          Final Boss
+        </span>
       </motion.div>
       <h2 className="text-3xl font-bold text-white">
         最后的
         <motion.span
           className="text-[#f87171] ml-2"
-          animate={{textShadow: ["0 0 0px #ef444400", "0 0 20px #ef444488", "0 0 0px #ef444400"]}}
+          animate={{
+            textShadow: [
+              "0 0 0px #ef444400",
+              "0 0 20px #ef444488",
+              "0 0 0px #ef444400",
+            ],
+          }}
           transition={{duration: 2, repeat: Infinity}}
         >
           大Boss
@@ -121,7 +261,8 @@ export default function Section08_Consensus() {
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
-          backgroundImage: "linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)",
+          backgroundImage:
+            "linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)",
           backgroundSize: "60px 60px",
         }}
       />
@@ -204,7 +345,8 @@ export default function Section08_Consensus() {
               🤔 为什么每个节点都正确，结果却错了？
             </motion.p>
             <p className="text-sm text-[#888] font-mono">
-              答案：缺乏 <span className="text-[#60a5fa]">共识（Consensus）</span>
+              答案：缺乏{" "}
+              <span className="text-[#60a5fa]">共识（Consensus）</span>
             </p>
           </motion.div>
         </PageBlock>
