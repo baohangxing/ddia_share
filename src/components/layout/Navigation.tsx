@@ -1,16 +1,19 @@
 import {motion} from "framer-motion";
+import {sectionIndexFromPage} from "../../contexts/PageContext";
 
 interface NavigationProps {
   sections: string[];
-  currentSection: number;
+  currentPage: number;
   onNavigate: (index: number) => void;
 }
 
 export function Navigation({
   sections,
-  currentSection,
+  currentPage,
   onNavigate,
 }: NavigationProps) {
+  const currentSection = sectionIndexFromPage(currentPage);
+
   return (
     <motion.nav
       initial={{y: -60}}
@@ -38,7 +41,7 @@ export function Navigation({
           ))}
         </div>
         <span className="text-xs font-mono text-[#555]">
-          {currentSection + 1} / {sections.length}
+          {currentSection >= 0 ? currentSection + 1 : 0} / {sections.length}
         </span>
       </div>
     </motion.nav>

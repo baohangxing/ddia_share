@@ -1,11 +1,6 @@
 import {useCallback, useEffect, useState, useRef} from "react";
-import {useScrollProgress} from "./hooks/useScrollProgress";
-import {useSectionNavigation} from "./hooks/useSectionNavigation";
 import {usePresentationMode} from "./hooks/usePresentationMode";
-import {
-  SectionVisibilityProvider,
-  useSectionVisibility,
-} from "./contexts/SectionVisibilityContext";
+import {PageProvider, usePage, sectionIndexFromPage} from "./contexts/PageContext";
 import {AppShell} from "./components/layout/AppShell";
 import {Navigation} from "./components/layout/Navigation";
 import {PresentationControls} from "./components/layout/PresentationControls";
@@ -34,22 +29,23 @@ const sections = [
 
 function AppContent() {
   const [entered, setEntered] = useState(false);
-  const {progress} = useScrollProgress(sections.length);
   const {isPresentation, togglePresentation} = usePresentationMode();
-  const {currentChapter, advancePhase, navigateToSection} =
-    useSectionVisibility();
-  const {scrollToSection} = useSectionNavigation({
-    totalSections: sections.length,
-  });
-  const prevChapterRef = useRef(currentChapter);
+  const {currentPage, advancePage, navigateToSection} = usePage();
+  const currentSection = sectionIndexFromPage(currentPage);
 
-  // Auto-scroll to newly revealed chapter
+  const scrollToSection = useCallback((index: number) => {
+    const el = document.getElementById(`section-${index}`);
+    if (el) el.scrollIntoView({behavior: "smooth"});
+  }, []);
+
+  const prevSectionRef = useRef(currentSection);
+
   useEffect(() => {
-    if (currentChapter > prevChapterRef.current) {
-      scrollToSection(currentChapter);
+    if (currentSection > prevSectionRef.current && currentSection >= 0) {
+      scrollToSection(currentSection);
     }
-    prevChapterRef.current = currentChapter;
-  }, [currentChapter, scrollToSection]);
+    prevSectionRef.current = currentSection;
+  }, [currentSection, scrollToSection]);
 
   const handleNavigate = useCallback(
     (index: number) => {
@@ -58,20 +54,19 @@ function AppContent() {
     [navigateToSection],
   );
 
-  // Global background click: advance one phase
   const handleBackgroundClick = useCallback(() => {
-    advancePhase();
-  }, [advancePhase]);
+    advancePage();
+  }, [advancePage]);
 
   if (!entered) {
     return <HomePage onEnter={() => setEntered(true)} />;
   }
 
   return (
-    <AppShell progress={progress}>
+    <AppShell>
       <Navigation
         sections={sections}
-        currentSection={currentChapter}
+        currentPage={currentPage}
         onNavigate={handleNavigate}
       />
 
@@ -123,9 +118,9 @@ function AppContent() {
 
 function App() {
   return (
-    <SectionVisibilityProvider sectionCount={sections.length}>
+    <PageProvider>
       <AppContent />
-    </SectionVisibilityProvider>
+    </PageProvider>
   );
 }
 

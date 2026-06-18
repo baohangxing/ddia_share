@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef} from "react";
-import {motion, AnimatePresence, useInView} from "framer-motion";
+import {motion, useInView} from "framer-motion";
 import {CodeBlock} from "../shared/CodeBlock";
 import {ArchitectureDiagram} from "../shared/ArchitectureDiagram";
 import {AnimatedNumber} from "../shared/AnimatedNumber";
@@ -9,11 +9,10 @@ import {TechCard} from "../shared/TechCard";
 import {Typewriter} from "../shared/Typewriter";
 import {MysqlExplainDiff} from "../shared/MysqlExplainDiff";
 import {ddiaChapters} from "../../data/ddiaContent";
-import { useSectionVisibility } from "../../contexts/SectionVisibilityContext";
+import {PageBlock} from "../shared/PageBlock";
 
 const chapter3 = ddiaChapters[0];
 
-// ── SQL code snippets ──
 const TABLE_SQL = `CREATE TABLE tweets (
   id         BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id    BIGINT NOT NULL,
@@ -48,16 +47,11 @@ const INDEX_SQL = `ALTER TABLE tweets ADD INDEX idx_user_time (user_id, create_t
 -- 🎯 B+Tree 索引在 user_id, create_time 列上建立，其排序规则是：
 先按 user_id 升序排列，user_id 相同的情况下再按 create_time 升序排列`;
 
-// ── Data growth sequence ──
 const rowCounts = [100, 1000, 10000, 100000, 1000000];
 const queryTimes = [5, 50, 300, 1200, 3000];
 const cpuPercents = [10, 20, 50, 80, 100];
 
-// ── COMPONENT ──
 export function Section02_Index() {
-  const { getSectionState } = useSectionVisibility();
-  const { mode, activePhase } = getSectionState(1);
-  const phase = mode === 'done' ? 10 : activePhase;
   const sectionRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -67,331 +61,303 @@ export function Section02_Index() {
       style={{background: "#050505", color: "#f5f5f5"}}
     >
       {/* ─── TITLE ─── */}
-      <motion.div
-        initial={{opacity: 0, y: 40}}
-        animate={{opacity: 1, y: 0}}
-        transition={{duration: 0.8}}
-        className="text-center mb-12"
-      >
-        <Typewriter
-          text="Day 1 - 用户越来越多了"
-          speed={80}
-          className="text-3xl md:text-5xl font-bold text-white"
-        />
-      </motion.div>
+      <PageBlock page="201">
+        <motion.div
+          initial={{opacity: 0, y: 40}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.8}}
+          className="text-center mb-12"
+        >
+          <Typewriter
+            text="Day 1 - 用户越来越多了"
+            speed={80}
+            className="text-3xl md:text-5xl font-bold text-white"
+          />
+        </motion.div>
+      </PageBlock>
 
       {/* ─── PHASE 1: TABLE SQL ─── */}
-      <AnimatePresence>
-        {phase >= 1 && (
-          <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            exit={{opacity: 0}}
-            transition={{duration: 0.6}}
-          >
-            <p className="text-[#aaa] mb-2 text-sm font-mono">
-              📋 tweets 表结构 — 初期设计
-            </p>
-            <CodeBlock code={TABLE_SQL} language="sql" delay={0} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PageBlock page="202">
+        <motion.div
+          initial={{opacity: 0, y: 30}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.6}}
+        >
+          <p className="text-[#aaa] mb-2 text-sm font-mono">
+            📋 tweets 表结构 — 初期设计
+          </p>
+          <CodeBlock code={TABLE_SQL} language="sql" delay={0} />
+        </motion.div>
+      </PageBlock>
 
       {/* ─── PHASE 2: TIMELINE QUERY ─── */}
-      <AnimatePresence>
-        {phase >= 2 && (
-          <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            exit={{opacity: 0}}
-            transition={{duration: 0.6}}
-          >
-            <p className="text-[#aaa] mb-2 text-sm font-mono">
-              ⚡ 首页查询：展示50个用户的最新的微博 （高频接口）
-            </p>
-            <CodeBlock code={TIMELINE_SQL} language="sql" delay={0.1} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PageBlock page="203">
+        <motion.div
+          initial={{opacity: 0, y: 30}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.6}}
+        >
+          <p className="text-[#aaa] mb-2 text-sm font-mono">
+            ⚡ 首页查询：展示50个用户的最新的微博 （高频接口）
+          </p>
+          <CodeBlock code={TIMELINE_SQL} language="sql" delay={0.1} />
+        </motion.div>
+      </PageBlock>
 
       {/* ─── PHASE 3: DATA GROWTH + QUERY TIME + CPU ─── */}
-      <AnimatePresence>
-        {phase >= 3 && (
-          <motion.div
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            transition={{duration: 0.6}}
-            className="my-10 space-y-6"
-          >
-            {/* Data Growth */}
-            <DataGrowthRow
-              label="📊 数据行数"
-              values={rowCounts}
-              suffix=" rows"
-              barColor="#3b82f6"
-            />
+      <PageBlock page="204">
+        <motion.div
+          initial={{opacity: 0}}
+          animate={{opacity: 1}}
+          transition={{duration: 0.6}}
+          className="my-10 space-y-6"
+        >
+          <DataGrowthRow
+            label="📊 数据行数"
+            values={rowCounts}
+            suffix=" rows"
+            barColor="#3b82f6"
+          />
 
-            {/* Query Time */}
-            <DataGrowthRow
-              label="⏱️ 查询耗时"
-              values={queryTimes}
-              suffix="ms"
-              barColor="#f59e0b"
-              dangerThreshold={1000}
-            />
+          <DataGrowthRow
+            label="⏱️ 查询耗时"
+            values={queryTimes}
+            suffix="ms"
+            barColor="#f59e0b"
+            dangerThreshold={1000}
+          />
 
-            {/* CPU */}
-            <DataGrowthRow
-              label="🔥 CPU"
-              values={cpuPercents}
-              suffix="%"
-              barColor="#ef4444"
-              dangerThreshold={80}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <DataGrowthRow
+            label="🔥 CPU"
+            values={cpuPercents}
+            suffix="%"
+            barColor="#ef4444"
+            dangerThreshold={80}
+          />
+        </motion.div>
+      </PageBlock>
 
       {/* ─── PHASE 5: ARCH DIAGRAM MYSQL RED ─── */}
-      <AnimatePresence>
-        {phase >= 5 && (
+      <PageBlock page="206">
+        <motion.div
+          initial={{opacity: 0, scale: 0.9}}
+          animate={{opacity: 1, scale: 1}}
+          transition={{duration: 0.5}}
+        >
+          <ArchitectureDiagram
+            nodes={[
+              {
+                id: "web",
+                label: "Web 服务",
+                x: 150,
+                y: 60,
+                width: 80,
+                height: 40,
+                color: "default",
+              },
+              {
+                id: "mysql",
+                label: "MySQL",
+                x: 350,
+                y: 60,
+                width: 80,
+                height: 40,
+                color: "danger",
+              },
+              {
+                id: "disk",
+                label: "磁盘 I/O",
+                x: 350,
+                y: 150,
+                width: 80,
+                height: 40,
+                color: "warning",
+              },
+            ]}
+            arrows={[
+              {
+                from: "web",
+                to: "mysql",
+                label: "SQL 查询",
+                animated: true,
+                color: "#ef4444",
+              },
+              {
+                from: "mysql",
+                to: "disk",
+                label: "全表扫描",
+                animated: true,
+                color: "#f59e0b",
+              },
+            ]}
+            width={500}
+            height={220}
+            delay={0}
+          />
+        </motion.div>
+      </PageBlock>
+
+      {/* ─── PHASE 6: ALERT ─── */}
+      <PageBlock page="207">
+        <motion.div
+          initial={{opacity: 0, scale: 0.8}}
+          animate={{opacity: 1, scale: 1}}
+          transition={{duration: 0.5, type: "spring"}}
+        >
+          <AlertBanner
+            message="首页打开失败 — 数据库连接超时"
+            type="error"
+            delay={0}
+          />
+        </motion.div>
+      </PageBlock>
+
+      {/* ─── PHASE 7: DIALOGUE ─── */}
+      <PageBlock page="208">
+        <motion.div
+          initial={{opacity: 0, x: -40}}
+          animate={{opacity: 1, x: 0}}
+          transition={{duration: 0.5, delay: 0.3}}
+          className="my-6 p-5 rounded-xl bg-[#111] border border-[#2a2a2a] text-center"
+        >
+          <p className="text-2xl mb-2">😰</p>
+          <p className="text-lg text-[#ddd] italic">
+            "我什么都没改啊……代码没动，配置没动……"
+          </p>
+          <p className="text-sm text-[#888] mt-2">
+            — 每一位后端工程师在事故前都说过的话
+          </p>
+        </motion.div>
+      </PageBlock>
+
+      {/* ─── PHASE 8: EXPLAIN ANIMATION ─── */}
+      <PageBlock page="209">
+        <motion.div
+          initial={{opacity: 0, y: 30}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.6}}
+          className="my-8"
+        >
+          <p className="text-[#f87171] mb-2 text-sm font-mono font-bold">
+            🔍 EXPLAIN 分析 — 揭开真相
+          </p>
+          <CodeBlock code={EXPLAIN_SQL} language="sql" delay={0.1} />
+
+          {/* Full table scan animation */}
+          <FullTableScanAnimation />
+        </motion.div>
+      </PageBlock>
+
+      {/* ─── PHASE 9: SOLUTION ─── */}
+      <PageBlock page="210">
+        <motion.div
+          initial={{opacity: 0, y: 30}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.6}}
+          className="my-8"
+        >
+          <p className="text-[#4ade80] mb-2 text-sm font-mono font-bold">
+            ✅ 解决方案：添加索引
+          </p>
+          <CodeBlock code={INDEX_SQL} language="sql" delay={0.1} />
+
+          {/* B+Tree animation */}
+          <BTreeAnimation />
+
+          {/* MySQL EXPLAIN diff */}
+          <MysqlExplainDiff />
+
+          {/* Before/After comparison */}
           <motion.div
             initial={{opacity: 0, scale: 0.9}}
             animate={{opacity: 1, scale: 1}}
-            transition={{duration: 0.5}}
+            transition={{delay: 2, duration: 0.6}}
+            className="mt-6 p-5 rounded-xl bg-[#0d0d0d] border border-[#2a2a2a]"
           >
-            <ArchitectureDiagram
-              nodes={[
-                {
-                  id: "web",
-                  label: "Web 服务",
-                  x: 150,
-                  y: 60,
-                  width: 80,
-                  height: 40,
-                  color: "default",
-                },
-                {
-                  id: "mysql",
-                  label: "MySQL",
-                  x: 350,
-                  y: 60,
-                  width: 80,
-                  height: 40,
-                  color: "danger",
-                },
-                {
-                  id: "disk",
-                  label: "磁盘 I/O",
-                  x: 350,
-                  y: 150,
-                  width: 80,
-                  height: 40,
-                  color: "warning",
-                },
-              ]}
-              arrows={[
-                {
-                  from: "web",
-                  to: "mysql",
-                  label: "SQL 查询",
-                  animated: true,
-                  color: "#ef4444",
-                },
-                {
-                  from: "mysql",
-                  to: "disk",
-                  label: "全表扫描",
-                  animated: true,
-                  color: "#f59e0b",
-                },
-              ]}
-              width={500}
-              height={220}
-              delay={0}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── PHASE 6: ALERT ─── */}
-      <AnimatePresence>
-        {phase >= 6 && (
-          <motion.div
-            initial={{opacity: 0, scale: 0.8}}
-            animate={{opacity: 1, scale: 1}}
-            exit={{opacity: 0}}
-            transition={{duration: 0.5, type: "spring"}}
-          >
-            <AlertBanner
-              message="首页打开失败 — 数据库连接超时"
-              type="error"
-              delay={0}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── PHASE 7: DIALOGUE ─── */}
-      <AnimatePresence>
-        {phase >= 7 && (
-          <motion.div
-            initial={{opacity: 0, x: -40}}
-            animate={{opacity: 1, x: 0}}
-            transition={{duration: 0.5, delay: 0.3}}
-            className="my-6 p-5 rounded-xl bg-[#111] border border-[#2a2a2a] text-center"
-          >
-            <p className="text-2xl mb-2">😰</p>
-            <p className="text-lg text-[#ddd] italic">
-              "我什么都没改啊……代码没动，配置没动……"
-            </p>
-            <p className="text-sm text-[#888] mt-2">
-              — 每一位后端工程师在事故前都说过的话
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── PHASE 8: EXPLAIN ANIMATION ─── */}
-      <AnimatePresence>
-        {phase >= 8 && (
-          <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.6}}
-            className="my-8"
-          >
-            <p className="text-[#f87171] mb-2 text-sm font-mono font-bold">
-              🔍 EXPLAIN 分析 — 揭开真相
-            </p>
-            <CodeBlock code={EXPLAIN_SQL} language="sql" delay={0.1} />
-
-            {/* Full table scan animation */}
-            <FullTableScanAnimation />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── PHASE 9: SOLUTION ─── */}
-      <AnimatePresence>
-        {phase >= 9 && (
-          <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.6}}
-            className="my-8"
-          >
-            <p className="text-[#4ade80] mb-2 text-sm font-mono font-bold">
-              ✅ 解决方案：添加索引
-            </p>
-            <CodeBlock code={INDEX_SQL} language="sql" delay={0.1} />
-
-            {/* B+Tree animation */}
-            <BTreeAnimation />
-
-            {/* MySQL EXPLAIN diff */}
-            <MysqlExplainDiff />
-
-            {/* Before/After comparison */}
-            <motion.div
-              initial={{opacity: 0, scale: 0.9}}
-              animate={{opacity: 1, scale: 1}}
-              transition={{delay: 2, duration: 0.6}}
-              className="mt-6 p-5 rounded-xl bg-[#0d0d0d] border border-[#2a2a2a]"
-            >
-              <p className="text-center text-sm text-[#aaa] mb-3">
-                查询耗时对比
-              </p>
-              <div className="flex items-center justify-center gap-6">
-                <div className="text-center">
-                  <span className="text-xs text-[#f87171] block mb-1">
-                    Before
-                  </span>
-                  <AnimatedNumber
-                    value={3000}
-                    suffix="ms"
-                    color="#ef4444"
-                    className="text-3xl"
-                  />
-                </div>
-                <span className="text-2xl text-[#555]">→</span>
-                <div className="text-center">
-                  <span className="text-xs text-[#4ade80] block mb-1">
-                    After
-                  </span>
-                  <AnimatedNumber
-                    value={5}
-                    suffix="ms"
-                    color="#22c55e"
-                    className="text-3xl"
-                  />
-                </div>
+            <p className="text-center text-sm text-[#aaa] mb-3">查询耗时对比</p>
+            <div className="flex items-center justify-center gap-6">
+              <div className="text-center">
+                <span className="text-xs text-[#f87171] block mb-1">
+                  Before
+                </span>
+                <AnimatedNumber
+                  value={3000}
+                  suffix="ms"
+                  color="#ef4444"
+                  className="text-3xl"
+                />
               </div>
-              <p className="text-center text-sm text-[#4ade80] mt-3 font-bold">
-                快了 600 倍！🚀
-              </p>
-            </motion.div>
+              <span className="text-2xl text-[#555]">→</span>
+              <div className="text-center">
+                <span className="text-xs text-[#4ade80] block mb-1">After</span>
+                <AnimatedNumber
+                  value={5}
+                  suffix="ms"
+                  color="#22c55e"
+                  className="text-3xl"
+                />
+              </div>
+            </div>
+            <p className="text-center text-sm text-[#4ade80] mt-3 font-bold">
+              快了 600 倍！🚀
+            </p>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      </PageBlock>
 
       {/* ─── PHASE 10: CHAPTER BADGE + SUMMARY ─── */}
-      <AnimatePresence>
-        {phase >= 10 && (
-          <motion.div
-            initial={{opacity: 0, y: 30}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.6}}
-            className="my-10"
-          >
-            <ChapterBadge
-              chapter={chapter3.chapter}
-              title={chapter3.chapterTitle}
-              delay={0}
-            />
+      <PageBlock page="211">
+        <motion.div
+          initial={{opacity: 0, y: 30}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.6}}
+          className="my-10"
+        >
+          <ChapterBadge
+            chapter={chapter3.chapter}
+            title={chapter3.chapterTitle}
+            delay={0}
+          />
 
-            <motion.div
-              initial={{opacity: 0, y: 20}}
-              whileInView={{opacity: 1, y: 0}}
-              transition={{delay: 0.5, duration: 0.6}}
-              viewport={{once: true}}
-              className="text-center my-8"
-            >
-              <p className="text-2xl md:text-3xl font-bold text-white">
-                索引不是优化。
-                <span className="text-[#3b82f6]">索引是生存条件。</span>
-              </p>
-            </motion.div>
+          <motion.div
+            initial={{opacity: 0, y: 20}}
+            whileInView={{opacity: 1, y: 0}}
+            transition={{delay: 0.5, duration: 0.6}}
+            viewport={{once: true}}
+            className="text-center my-8"
+          >
+            <p className="text-2xl md:text-3xl font-bold text-white">
+              索引不是优化。
+              <span className="text-[#3b82f6]">索引是生存条件。</span>
+            </p>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      </PageBlock>
 
       {/* ─── DDIA KNOWLEDGE CARDS ─── */}
-      <AnimatePresence>
-        {phase >= 10 && (
-          <motion.div
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            transition={{delay: 1, duration: 0.6}}
-            className="my-12"
-          >
-            <h3 className="text-xl font-bold text-white mb-6 text-center">
-              📚 DDIA 知识卡片
-            </h3>
-            {chapter3.cards.map((card, i) => (
-              <TechCard
-                key={i}
-                title={card.title}
-                concept={card.concept}
-                description={card.description}
-                items={card.items}
-                delay={1.2}
-                index={i}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PageBlock page="211">
+        <motion.div
+          initial={{opacity: 0}}
+          animate={{opacity: 1}}
+          transition={{delay: 1, duration: 0.6}}
+          className="my-12"
+        >
+          <h3 className="text-xl font-bold text-white mb-6 text-center">
+            📚 DDIA 知识卡片
+          </h3>
+          {chapter3.cards.map((card, i) => (
+            <TechCard
+              key={i}
+              title={card.title}
+              concept={card.concept}
+              description={card.description}
+              items={card.items}
+              delay={1.2}
+              index={i}
+            />
+          ))}
+        </motion.div>
+      </PageBlock>
     </section>
   );
 }
@@ -452,7 +418,6 @@ function DataGrowthRow({
             animate={{width: `${barWidth}%`}}
             transition={{duration: 1.5, ease: "easeOut"}}
           />
-          {/* Danger pulse */}
           {isDanger && (
             <motion.div
               className="absolute inset-0 rounded-full"
@@ -472,7 +437,6 @@ function FullTableScanAnimation() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, {once: true, margin: "-50px"});
 
-  // Simulated row scanning
   const rowLabels = Array.from({length: 20}, (_, i) => ({
     id: i + 1,
     color: i < 3 ? "#4ade80" : i < 6 ? "#60a5fa" : "#333",
@@ -487,7 +451,6 @@ function FullTableScanAnimation() {
         ⚡ 全表扫描中... 扫描 1,000,000 行
       </p>
 
-      {/* Visual grid of rows being scanned */}
       <div className="grid grid-cols-5 gap-2 max-w-md mx-auto mb-4">
         {rowLabels.map((row, i) => (
           <motion.div
@@ -512,7 +475,6 @@ function FullTableScanAnimation() {
         ))}
       </div>
 
-      {/* Scanning progress bar */}
       <div className="max-w-md mx-auto">
         <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
           <motion.div
@@ -528,7 +490,6 @@ function FullTableScanAnimation() {
         </div>
       </div>
 
-      {/* Scanned count */}
       <motion.div
         className="text-center mt-3"
         initial={{opacity: 0}}
@@ -561,7 +522,6 @@ function BTreeAnimation() {
     }
   }, [isInView]);
 
-  // B+Tree node positions: root → internal → leaf nodes
   const rootNode = {x: 200, y: 30};
   const internalNodes = [
     {x: 80, y: 100},
@@ -589,7 +549,6 @@ function BTreeAnimation() {
         className="w-full max-w-md"
         style={{maxHeight: 230}}
       >
-        {/* Edges from root to internal */}
         {internalNodes.map((node, i) => (
           <motion.line
             key={`r2i-${i}`}
@@ -605,7 +564,6 @@ function BTreeAnimation() {
           />
         ))}
 
-        {/* Edges from internal to leaf */}
         {leafNodes.map((leaf, i) => {
           const parent = internalNodes[Math.floor(i / 2)];
           return (
@@ -624,7 +582,6 @@ function BTreeAnimation() {
           );
         })}
 
-        {/* Link between leaf nodes (doubly linked list) */}
         {leafNodes.map((leaf, i) => {
           if (i === leafNodes.length - 1) return null;
           const next = leafNodes[i + 1];
@@ -645,7 +602,6 @@ function BTreeAnimation() {
           );
         })}
 
-        {/* Root node */}
         <BTreeNode
           cx={rootNode.x}
           cy={rootNode.y}
@@ -654,7 +610,6 @@ function BTreeAnimation() {
           delay={0}
         />
 
-        {/* Internal nodes */}
         {internalNodes.map((node, i) => (
           <BTreeNode
             key={`int-${i}`}
@@ -667,13 +622,16 @@ function BTreeAnimation() {
           />
         ))}
 
-        {/* Leaf nodes */}
         {leafNodes.map((node, i) => (
           <BTreeNode
             key={`leaf-${i}`}
             cx={node.x}
             cy={node.y}
-            label={["(1,01-07)", "(1,08-15)", "(2,01-07)", "(2,08-15)", "(3,01-15)"][i]}
+            label={
+              ["(1,01-07)", "(1,08-15)", "(2,01-07)", "(2,08-15)", "(3,01-15)"][
+                i
+              ]
+            }
             grown={grown}
             delay={0.7 + i * 0.1}
             color="#22c55e"
@@ -681,7 +639,6 @@ function BTreeAnimation() {
           />
         ))}
 
-        {/* Label */}
         <motion.text
           x="200"
           y="215"
@@ -693,7 +650,8 @@ function BTreeAnimation() {
           animate={grown ? {opacity: 1} : {}}
           transition={{delay: 2, duration: 0.5}}
         >
-          B+Tree: 复合索引先按 user_id 排序，再按 create_time 排序，叶子链表支持范围扫描
+          B+Tree: 复合索引先按 user_id 排序，再按 create_time
+          排序，叶子链表支持范围扫描
         </motion.text>
       </svg>
     </motion.div>
